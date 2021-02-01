@@ -1,0 +1,196 @@
+// JavaScript Document
+$(document).ready(function(){
+		
+		//slice-khachhang - owl-carousel 
+		  $('#slide-clbhome').owlCarousel({
+		  lazyLoad:true,
+		  navigation : true,
+		  loop:true,
+		  autowidth:false,
+		  autoplay:false,
+		  responsiveClass:true,
+		  responsive:{
+				0:{
+					items:2,
+					margin:10,
+				},
+				360:{
+					items:2,
+					margin:10,
+				},
+				411:{
+					items:2,
+					margin:10,
+				},
+				533:{
+					items:2,
+					margin:10,
+				},
+				640:{
+					items:2,
+					margin:15,
+				},
+				736:{
+					items:2,
+					margin:15,
+				},
+				768:{
+					items:3,
+					margin:15,
+				},
+				992:{
+					items:3,
+					margin:20,
+				},
+				1200:{
+					items:3,
+					margin:20,
+				},
+		  },
+		  nav:true,
+		  dots:false,
+		  autoHeight:false,
+		  autoplayTimeout:3000,
+		  autoplayHoverPause:false,
+		});	
+		//slice-newshome - owl-carousel 
+		  $('#slide-videohome').owlCarousel({
+		  items:1,
+		  lazyLoad:true,
+		  navigation : true,
+		  loop:true,
+		  autowidth:false,
+		  autoplay:true,
+		  responsiveClass:false,
+		  nav:true,
+		  dots:false,
+		  autoHeight:false,
+		  autoplayTimeout:3000,
+		  autoplayHoverPause:false,
+		});
+		//slice-newshome - owl-carousel 
+		  $('#slide-hoidap').owlCarousel({
+		  items:1,
+		  lazyLoad:true,
+		  navigation : true,
+		  loop:true,
+		  autowidth:false,
+		  autoplay:true,
+		  responsiveClass:false,
+		  nav:false,
+		  dots:true,
+		  autoHeight:false,
+		  autoplayTimeout:3000,
+		  autoplayHoverPause:false,
+		});
+		//slice-khachhang - owl-carousel 
+		  $('#dangchuy').owlCarousel({
+		  lazyLoad:true,
+		  navigation : true,
+		  loop:true,
+		  autowidth:false,
+		  autoplay:false,
+		  responsiveClass:true,
+		  responsive:{
+				0:{
+					items:2,
+					margin:10,
+				},
+				360:{
+					items:2,
+					margin:10,
+				},
+				411:{
+					items:2,
+					margin:10,
+				},
+				533:{
+					items:2,
+					margin:10,
+				},
+				640:{
+					items:2,
+					margin:15,
+				},
+				736:{
+					items:2,
+					margin:15,
+				},
+				768:{
+					items:3,
+					margin:15,
+				},
+				992:{
+					items:3,
+					margin:15,
+				},
+				1200:{
+					items:3,
+					margin:20,
+				},
+		  },
+		  nav:true,
+		  dots:false,
+		  autoHeight:false,
+		  autoplayTimeout:3000,
+		  autoplayHoverPause:false,
+		});	
+		//slice-tinchuy - owl-carousel 
+		  $('#slide-hoatdonghome').owlCarousel({
+		  lazyLoad:true,
+		  navigation : true,
+		  loop:true,
+		  autowidth:false,
+		  autoplay:true,
+		  responsiveClass:true,
+		  responsive:{
+				0:{
+					items:1,
+				},
+				360:{
+					items:1,
+				},
+				411:{
+					items:1,
+				},
+				533:{
+					items:2,
+					margin:10,
+				},
+				640:{
+					items:2,
+					margin:10,
+				},
+				736:{
+					items:2,
+					margin:10,
+				},
+				768:{
+					items:2,
+					margin:15,
+				},
+				992:{
+					items:3,
+					margin:20,
+				},
+				1200:{
+					items:3,
+					margin:30,
+				},
+		  },
+		  nav:true,
+		  dots:false,
+		  autoHeight:false,
+		  autoplayTimeout:5000,
+		  autoplayHoverPause:false,
+		});
+		//js li- chandung
+		$('.hoatdong-home .cover-home .owl-carousel .card').matchHeight();
+		//menu
+		  $('nav#menu').mmenu();
+		//popover
+		$(function () {
+		  $('[data-toggle="popover"]').popover()
+		})
+		
+});
