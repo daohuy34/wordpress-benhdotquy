@@ -1,38 +1,37 @@
 <?php get_header(); ?>
-<main class="bd-masthead" id="content" role="main">
 	<div class="topmain">
     	<div class="container">
             <div class="row">
+                <?php 
+                    $args = array(
+                        'type'      => 'post',
+                        'child_of'  => 0,
+                        'parent'    => '',
+                        'hide_empty' => 0,
+                        'meta_query'	=> array(
+                            'relation'		=> 'AND',
+                            array(
+                                'key'	 	=> 'isShowHeader',
+                                'value'	  	=> array('1'),
+                                'compare' 	=> 'IN',
+                            ),
+                        ),
+                    );
+                    $categories = get_categories($args);
+                    $categories = array_slice($categories, 0, 3);
+                    foreach ( $categories as $category ):
+                ?>
                 <div class="col-3">
                     <div class="img-topmain">
                         <div class="responsive-image responsive-image--16by9">
-                            <a href="#">
-                                <img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-1.jpg">
+                            <a href="<?php echo get_category_link( $category->term_id ) ?>">
+                                <img alt="<?php echo $category->name; ?>" src="<?php echo get_field( 'image', 'category_'.$category->term_id )['url'] ?>">
                             </a>
                         </div>
-                        <h3 class="nametop">Tầm soát đột quỵ</h3>
+                        <h3 class="nametop"><a href="<?php echo get_category_link( $category->term_id ) ?>"><?php echo $category->name; ?></a></h3>
                     </div>
                 </div>
-                <div class="col-3">
-                    <div class="img-topmain">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#">
-                                <img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-2.jpg">
-                            </a>
-                        </div>
-                        <h3 class="nametop">Dấu hiệu đột quỵ</h3>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="img-topmain">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#">
-                                <img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-3.jpg"> 
-                            </a>
-                        </div>
-                        <h3 class="nametop">Chăm sóc sau đột quỵ</h3>
-                    </div>
-                </div>
+                <?php endforeach; ?>
                 <div class="col-3 top-address">
                 	<div class="bg-topadd">
                         <div class="img-add mb-2"><a href="#" class="d-flex flex-nowrap"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon4-address.png"/><h3>Địa chỉ cấp cứu đột quỵ trong toàn quốc</h3></a></div>
@@ -46,47 +45,70 @@
         </div>
     </div><!--topmain-->
     <div class="top-cover">
-    	<div class="container">
-        	<div class="row">
-            	<div class="col-6">
-                	<div class="img-cover">
-                    	<div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-4.jpg"></a>
+        <div class="container">
+            <div class="row">
+                <?php
+                    $args = array( 
+                        'posts_per_page' => 5,
+                        'post_status' => 'publish',
+                        'post_type' => 'post',);
+                    $loop = new WP_Query( $args );
+                    $postList = $loop->posts;
+                    foreach($postList as $key => $post):
+                    if($key === 0):
+                    $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                    $category = get_the_category($post->ID);
+                ?>
+                <div class="col-6">
+                    <div class="img-cover">
+                        <div class="responsive-image responsive-image--16by9">
+                            <a href="#"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
                         </div>	
                     </div>
-                    <h2 class="name-sub2"><a href="#">Tầm soát đột quỵ</a></h2>
-                    <h3><a href="#">Vì sao trẻ em cũng đột quỵ? Có nên đi tầm soát đột qụy cho trẻ?</a></h3>
+                    <h2 class="name-sub2"><a href="<?php echo get_category_link( $category[0]->term_id) ?>"><?php echo $category[0]->cat_name; ?></a></h2>
+                    <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
                 </div>
+                <?php 
+                    endif;
+                    endforeach; 
+                ?>
                 <div class="col-6">
-                	<ul class="cover-nb1 d-flex flex-nowrap">
-                    	<li>
-                        	<div class="img-cover">
-                                <div class="responsive-image responsive-image--16by9">
-                                    <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-4.jpg"></a>
-                                </div>	
-                            </div>
-                            <h2 class="name-sub2"><a href="#">Tin tức đột quỵ</a></h2>
-                            <h4><a href="#">Vì sao trẻ em cũng đột quỵ? Có nên đi tầm soát đột qụy cho trẻ?</a></h4>	
-                        </li>
+                    <ul class="cover-nb1 d-flex flex-nowrap">
+                        <?php
+                            foreach($postList as $key => $post):
+                            if($key >0 && $key <=2):
+                            $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                            $category = get_the_category($post->ID);
+                        ?>
                         <li>
-                        	<div class="img-cover">
+                            <div class="img-cover">
                                 <div class="responsive-image responsive-image--16by9">
-                                    <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-4.jpg"></a>
+                                    <a href="#"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
                                 </div>	
                             </div>
-                            <h2 class="name-sub2"><a href="#">Dấu hiệu đột quỵ</a></h2>
-                            <h4><a href="#">Vì sao trẻ em cũng đột quỵ? Có nên đi tầm soát đột qụy cho trẻ?</a></h4>	
+                            <h2 class="name-sub2"><a href="<?php echo get_category_link( $category[0]->term_id) ?>"><?php echo $category[0]->cat_name; ?></a></h2>
+                            <h4><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h4>	
                         </li>
+                        <?php 
+                            endif;
+                            endforeach; 
+                        ?>
                     </ul>
                     <ul class="cover-nb1 cover-nb2 d-flex flex-nowrap">
-                    	<li>
-                        	<h2 class="name-sub2"><a href="#">Tầm soát đột quỵ</a></h2>
-                            <h4><a href="#">Vì sao trẻ em cũng đột quỵ? Có nên đi tầm soát đột qụy cho trẻ?</a></h4>	
-                        </li>
+                        <?php
+                            foreach($postList as $key => $post):
+                            if($key >2):
+                            $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                            $category = get_the_category($post->ID);    
+                        ?>
                         <li>
-                        	<h2 class="name-sub2"><a href="#">Chăm sóc sau đột quỵ</a></h2>
-                            <h4><a href="#">Vì sao trẻ em cũng đột quỵ? Có nên đi tầm soát đột qụy cho trẻ?</a></h4>	
+                            <h2 class="name-sub2"><a href="<?php echo get_category_link( $category[0]->term_id) ?>"><?php echo $category[0]->cat_name; ?></a></h2>
+                            <h4><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h4>	
                         </li>
+                        <?php 
+                            endif;
+                            endforeach; 
+                        ?>
                     </ul>
                 </div>
             </div>
@@ -97,104 +119,100 @@
         	<div class="row">
             	<div class="col-9">
                 	<div class="caulacbo-home">
+                        <?php
+                            $category = get_category(28);
+                        ?>
                     	<div class="top-clbhome d-flex flex-nowrap w-100">
-                        	<h2><a href="#">CLB Bệnh nhân Đột quỵ</a></h2>
+                        	<h2><a href="<?php echo get_category_link( $category->term_id) ?>"><?php echo $category->name; ?></a></h2>
                             <div class="ml-auto"><a class="btn-dangkyhoivien" data-toggle="modal" data-target="#thanhvienModal" data-whatever="@mdo">Đăng ký thành viên</a></div>
                         </div>
                         <div class="slide-clbhome">
-                        	 <div id="slide-clbhome" class="owl-carousel">
+                        	<div id="slide-clbhome" class="owl-carousel">
+                                <?php
+                                    $args = array( 
+                                        'posts_per_page' => 6,
+                                        'post_status' => 'publish',
+                                        'post_type' => 'post',
+                                        'category_name' => $category->slug
+                                        );
+                                    $loop = new WP_Query( $args );
+                                    $postList = $loop->posts;
+                                    foreach($postList as $key => $post):
+                                    $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                                ?>
                                 <div class="item-clbhome">
                                     <div class="img-clbhome">
                                         <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
+                                            <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url ?>"></a>
                                         </div>
                                     </div>
-                                    <h3><a href="#">CLB Tim mạch, Đột quỵ - điểm hẹn sức khỏe cho mọi người</a></h3>
+                                    <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
                                 </div>
-                                <div class="item-clbhome">
-                                    <div class="img-clbhome">
-                                        <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-6.jpg"></a>
-                                        </div>
-                                    </div>
-                                    <h3><a href="#">Cần Thơ: Cứu bé gái 10 tuổi đột quỵ xuất huyết não do dị dạng mạch máu bẩm sinh</a></h3>
-                                </div>
-                                <div class="item-clbhome">
-                                    <div class="img-clbhome">
-                                        <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-7.jpg"></a>
-                                        </div>
-                                    </div>
-                                    <h3><a href="#">Trầm cảm sau đột quỵ: chẩn đoán và can thiệp</a></h3>
-                                </div>
-                                <div class="item-clbhome">
-                                    <div class="img-clbhome">
-                                        <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-8.png"></a>
-                                        </div>
-                                    </div>
-                                    <h3><a href="#">Tuổi già không sợ cô đơn!!!</a></h3>
-                                </div>
+                                <?php endforeach; ?>
                             </div><!--carousel-clbhome-->
                         </div><!--slide-clbhome-->
                     </div><!--caulacbo-home-->
                     <div class="multimedia-home">
                     	<div class="top-mutimedia d-flex flex-nowrap w-100">
                         	<h4>Multimedia</h4>
-                            <a class="btn-youtube ml-auto" href="#"><span>Theo dõi trên:</span></a>
+                            <a class="btn-youtube ml-auto" href="<?php echo theme_option('youtube'); ?>"><span>Theo dõi trên:</span></a>
                         </div>
                         <div class="row">
                         	<div class="col-8">
                             	<div class="slide-clbhome slide-videohome">
                                 	<div id="slide-videohome" class="owl-carousel">
+                                        <?php
+                                            $args = array( 
+                                                'posts_per_page' => 6,
+                                                'post_status' => 'publish',
+                                                'post_type' => 'post',
+                                                'category_name' => 'video'
+                                                );
+                                            $loop = new WP_Query( $args );
+                                            $postList = $loop->posts;
+                                            foreach($postList as $key => $post):
+                                            $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                                        ?>
                                         <div class="item-clbhome">
                                             <div class="img-clbhome">
                                                 <div class="responsive-image responsive-image--16by9">
-                                                    <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"><span></span></a>
+                                                    <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"><span></span></a>
                                                 </div>
-                                                <h2><a href="#">Video</a></h2>
+                                                <h2><a href="<?php echo get_category_link(29) ?>">Video</a></h2>
                                             </div>
-                                            <h3><a href="#">CLB Tim mạch, Đột quỵ - điểm hẹn sức khỏe cho mọi người</a></h3>
+                                            <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
                                         </div>
-                                        <div class="item-clbhome">
-                                            <div class="img-clbhome">
-                                                <div class="responsive-image responsive-image--16by9">
-                                                    <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"><span></span></a>
-                                                </div>
-                                                <h2><a href="#">Video</a></h2>
-                                            </div>
-                                            <h3><a href="#">CLB Tim mạch, Đột quỵ - điểm hẹn sức khỏe cho mọi người</a></h3>
-                                        </div>
-                                        <div class="item-clbhome">
-                                            <div class="img-clbhome">
-                                                <div class="responsive-image responsive-image--16by9">
-                                                    <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"><span></span></a>
-                                                </div>
-                                                <h2><a href="#">Video</a></h2>
-                                            </div>
-                                            <h3><a href="#">CLB Tim mạch, Đột quỵ - điểm hẹn sức khỏe cho mọi người</a></h3>
-                                        </div>
+                                        <?php endforeach; ?>
                                 	</div>
                                 </div><!--slide-videohome-->
                             </div><!--col-8-->
                             <div class="col-4">
                             	<div class="slide-videohome podcast-home">
                                 	<ul>
+                                        <?php
+                                            $args = array( 
+                                                'posts_per_page' => 4,
+                                                'post_status' => 'publish',
+                                                'post_type' => 'post',
+                                                'cat' => 33
+                                                );
+                                            $loop = new WP_Query( $args );
+                                            $postList = $loop->posts;
+                                            foreach($postList as $key => $post):
+                                            $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                                        ?>
                                     	<li>
+                                            <?php if($key ===0): ?>
                                             <div class="img-clbhome">
                                                 <div class="responsive-image responsive-image--16by9">
-                                                    <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
+                                                    <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="..." src="<?php echo $url; ?>"></a>
                                                 </div>
-                                                <h2><a href="#">Podcast</a></h2>
+                                                <h2><a href="<?php echo get_category_link(33) ?>">Podcast</a></h2>
                                             </div>
-                                            <h3><a href="#">CLB Tim mạch, Đột quỵ - điểm hẹn sức khỏe cho mọi người</a></h3>
+                                            <?php endif; ?>
+                                            <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
                                         </li>
-                                        <li>
-                                            <h3><a href="#">Cần Thơ: Cứu bé gái 10 tuổi đột quỵ xuất huyết não do dị dạng mạch máu bẩm sinh</a></h3>
-                                        </li>
-                                        <li>
-                                            <h3><a href="#">Cần Thơ: Cứu bé gái 10 tuổi đột quỵ xuất huyết não do dị dạng mạch máu bẩm sinh</a></h3>
-                                        </li>
+                                        <?php endforeach; ?>
                                     </ul>
                                 </div><!--podcast-home-->
                             </div><!--col-4-->
@@ -205,39 +223,30 @@
                 	<div class="hoidap-home">
                     	<div class="slide-clbhome slide-videohome slide-hoidap">
                             <div id="slide-hoidap" class="owl-carousel">
+                                <?php
+                                    $args = array( 
+                                        'posts_per_page' => 4,
+                                        'post_status' => 'publish',
+                                        'post_type' => 'post',
+                                        'cat' => 32
+                                        );
+                                    $loop = new WP_Query( $args );
+                                    $postList = $loop->posts;
+                                    foreach($postList as $key => $post):
+                                    $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                                ?>
                                 <div class="item-clbhome">
                                     <div class="img-clbhome">
                                         <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
+                                            <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url ?>"></a>
                                         </div>
                                     </div>
                                     <div class="txt-slidehoidap">
-                                        <h3><a href="#">GS.TS.BS Trần Chí Bằng</a></h3>
-                                        <p>Giám đốc Bệnh viện Đột quỵ Tim Mạch Cần Thơ, Chủ tịch Hội can thiệp thần kinh TP.HCM, Phó chủ tịch Hội điện quang can thiệp Việt Nam...</p>
+                                        <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
+                                        <p><?php echo the_excerpt(); ?></p>
                                     </div>
                                 </div>
-                                <div class="item-clbhome">
-                                    <div class="img-clbhome">
-                                        <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                                        </div>
-                                    </div>
-                                    <div class="txt-slidehoidap">
-                                        <h3><a href="#">GS.TS.BS Trần Chí Bằng</a></h3>
-                                        <p>Giám đốc Bệnh viện Đột quỵ Tim Mạch Cần Thơ, Chủ tịch Hội can thiệp thần kinh TP.HCM, Phó chủ tịch Hội điện quang can thiệp Việt Nam...</p>
-                                    </div>
-                                </div>
-                                <div class="item-clbhome">
-                                    <div class="img-clbhome">
-                                        <div class="responsive-image responsive-image--16by9">
-                                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                                        </div>
-                                    </div>
-                                    <div class="txt-slidehoidap">
-                                        <h3><a href="#">GS.TS.BS Trần Chí Bằng</a></h3>
-                                        <p>Giám đốc Bệnh viện Đột quỵ Tim Mạch Cần Thơ, Chủ tịch Hội can thiệp thần kinh TP.HCM, Phó chủ tịch Hội điện quang can thiệp Việt Nam...</p>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div><!--slide-videohome-->
                         <div class="tuvandotquy-home">
@@ -245,230 +254,68 @@
                             <a data-toggle="modal" data-target="#cauhoiModal" data-whatever="@mdo">Đặt câu hỏi tại đây</a>
                         </div><!--tuvandotquy-home-->
                         <ul class="list-tuvanhome">
-                        	<li><a href="#">Đột quỵ và đau nửa đầu phân biệt như thế nào?</a></li>
-                            <li><a href="#">Phục hồi khả năng nói cho bệnh nhân đột quỵ</a></li>
-                            <li><a href="#">Phòng ngừa nguy cơ bệnh tăng huyết áp dẫn đến đột quỵ</a></li>
-                            <li><a href="#">Sau đột quỵ, tắm thế nào cho an toàn?</a></li>
-                            <li><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></li>
-                            <li><a href="#">Xem thêm câu hỏi >></a></li>
+                            <?php
+                                $args = array( 
+                                    'posts_per_page' => 5,
+                                    'post_status' => 'publish',
+                                    'post_type' => 'post',
+                                    'cat' => 31
+                                    );
+                                $loop = new WP_Query( $args );
+                                $postList = $loop->posts;
+                                foreach($postList as $key => $post):
+                            ?>
+                        	<li><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></li>
+                            <?php endforeach; ?>
+                            <li><a href="<?php echo get_category_link(31) ?>">Xem thêm câu hỏi >></a></li>
                         </ul><!--list-tuvanhome-->
                     </div><!--hoidap-home-->
                 </div><!--col-3-->
             </div>
         </div>
     </div><!--row2-home-->
-    <div class="timhieu-home">
-    	<div class="container">
-        	<div class="top-timhieuhome d-flex flex-nowrap">
-            	<h4>
-                	Tìm hiểu về đột quỵ
+    <div id="timhieu" class="timhieu-home">
+        <div class="container">
+            <div class="top-timhieuhome d-flex flex-nowrap">
+                <h4>
+                    <?php 
+                        $itemsMenu = wp_get_menu_array('chuyen-muc');
+                        $currenCate = array_values($itemsMenu)[0];
+                    ?>
+                    <span id="title" class=""><?php echo str_replace('+',' ',$_COOKIE["curren_cate_title"]);?></span>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li><a class="dropdown-item" href="#">Tin tức</a></li>
+                        <?php foreach($itemsMenu as $key => $item): ?>
+                        <li><a onclick="myFunction('<?php echo $item['title']; ?>', '<?php echo $item['object_id']; ?>')" class="dropdown-item button"><?php echo $item['title']; ?></a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Tầm soát đột quỵ</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Dấu hiệu đột quỵ</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Chăm sóc sau đột quỵ</a></li>
-                     </ul>
+                        <?php endforeach; ?>
+                    </ul>
                 </h4>
             </div>
             <div class="row row-cols-1 row-cols-md-4 g-4">
+                <?php
+                    $args = array( 
+                        'posts_per_page' => 8,
+                        'post_status' => 'publish',
+                        'post_type' => 'post',
+                        'cat' => $_COOKIE["curren_cate_id"]
+                        );
+                    $loop = new WP_Query( $args );
+                    $postList = $loop->posts;
+                    foreach($postList as $key => $post):
+                    $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+                ?>
                 <div class="col">
                     <div class="img-timhieuhome">
                         <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
+                            <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
                         </div>
                     </div>
-                    <h2 class="name-sub2"><a href="#">Tầm soát đột quỵ</a></h2>
-                    <h3><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></h3>
-              	</div>
-				<div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Dấu hiệu đột quỵ</a></h2>
-                    <h3><a href="#">Cần Thơ: Cứu bé gái 10 tuổi đột quỵ xuất huyết não do dị dạng mạch máu bẩm sinh</a></h3>
-              	</div>
-				<div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Tầm soát đột quỵ</a></h2>
-                    <h3><a href="#">Sau đột quỵ, tắm thế nào cho an toàn?</a></h3>
-              	</div>
-                <div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Chăm sóc sau đột quỵ</a></h2>
-                    <h3><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></h3>
-              	</div>
-                <div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Tầm soát đột quỵ</a></h2>
-                    <h3><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></h3>
-              	</div>
-                <div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Dấu hiệu đột quỵ</a></h2>
-                    <h3><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></h3>
-              	</div>
-                <div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Chăm sóc sau đột quỵ</a></h2>
-                    <h3><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></h3>
-              	</div>
-                <div class="col">
-                    <div class="img-timhieuhome">
-                        <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/image-5.png"></a>
-                        </div>
-                    </div>
-                    <h2 class="name-sub2"><a href="#">Tầm soát đột quỵ</a></h2>
-                    <h3><a href="#">Liệu pháp điều trị và bổ sung thay thế cho bệnh nhân đột quỵ</a></h3>
-              	</div>
+                    <h2 class="name-sub2"><a href="#"><?php echo $currenCate['title']; ?></a></h2>
+                    <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
+                </div>
+                <?php endforeach; ?>
             </div><!--row-->
         </div><!--container-->
     </div><!--timhieu-home-->
-    <div class="footer-dotquy">
-    	<div class="container  d-flex flex-nowrap">
-        	<ul class="list-group list-group-horizontal">
-            	<li>Theo dõi chúng tôi trên:</li>
-                <li><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon12-facebook.png"/></a></li>
-                <li><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon13-zalo.png"/></a></li>
-                <li><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon14-youtube.png"/></a></li>
-            </ul>
-            <div class="copyright ml-auto">
-            	<p>© Copyright 2021 Benhdotquynet, All rights reserved. <a href="#">® AloBacsi.vn</a> giữ bản quyền nội dung trên website này.</p>
-                <p>Thông tin trên trang mang tính chất tham khảo, vui lòng không tự ý áp dụng, nếu không có sự đồng ý của bác sĩ điều trị.</p>
-                <div class="d-md-flex flex-md-row-reverse align-items-right justify-content-right"><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-benhdotquy.net.png"/></a></div>
-            </div>
-        </div>
-    </div><!--footer-dotquy-->
-    <div class="modal fade searchadd-modal" id="searhAdd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="searhAdd">Địa chỉ cấp cứu đột quỵ</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-              	<select class="form-control form-select form-select-sm mb-3" aria-label=".form-select-sm example">
-                  <option selected>Chọn tên tỉnh thành</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-                <input type="text" class="form-control" id="recipient-name" placeholder="Nhập từ khóa cần tìm...">
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-outline-primary">Tìm kiếm</button>
-          </div>
-        </div>
-      </div>
-    </div><!--searhAdd-->
-    <div class="modal fade searchadd-modal" id="thanhvienModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="thanhvienModal">Đăng ký thành viên</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-            	<div class="form-group">
-                	<label for="inputEmail4" class="form-label">Họ và tên:</label>
-    				<input type="text" class="form-control" id="inputEmail4">
-                </div>
-                <div class="form-group">
-                	<label for="inputEmail4" class="form-label">Số điện thoại:</label>
-    				<input type="text" class="form-control" id="inputEmail4">
-                </div>
-                <div class="form-group">
-                	<label for="inputEmail4" class="form-label">Email</label>
-    				<input type="text" class="form-control" id="inputEmail4">
-                </div>
-                <div class="form-group">
-                	<label for="inputEmail4" class="form-label">Địa chỉ của bạn:</label>
-    				<input type="text" class="form-control" id="inputEmail4">
-                </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-outline-primary">Đăng ký</button>
-          </div>
-        </div>
-      </div>
-    </div><!--dangkythanhvien-->
-    <div class="modal fade searchadd-modal" id="cauhoiModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="cauhoiModal">Đặt câu hỏi tư vấn</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Họ và tên">
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Số điện thoại">
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Email">
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Địa chỉ">
-                <textarea class="form-control" aria-label="With textarea" placeholder="Nhập nội dung cần hỏi"></textarea>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-outline-primary">Đặt câu hỏi</button>
-          </div>
-        </div>
-      </div>
-    </div><!--Đặt câu hỏi-->
-    <!-- allmenu-mobile start-->
-    <nav id="menu">
-    	<ul>
-        	<li><a class="ml-auto"><input class=" form-control" type="text" autocomplete="off" name="s" placeholder="Tìm kiếm"></a>
-</li>
-            <li class="active"><a href="#">Trang chủ</a></li>
-            <li><a href="#">Tầm soát đột quỵ</a></li>
-            <li><a href="#">Dấu hiệu đột quỵ</a></li>
-            <li><a href="#">Chăm sóc sau đột quỵ</a></li>
-            <li><a href="#">Tin tức về đột quỵ</a></li>  
-            <li><a href="#">CLB Bệnh nhân đột quỵ</a></li>   
-            <li><a href="#">Video</a></li>
-            <li><a href="#">Podcast</a></li>  
-            <li><a href="#">Tư vấn</a></li>   
-            <li><a href="#">Đăng ký thành viên</a></li>   
-            <li><a href="#">Đặt câu hỏi tư vấn</a></li>   
-         </ul>
-    </nav>
-</main>
+    
 <?php get_footer(); ?>

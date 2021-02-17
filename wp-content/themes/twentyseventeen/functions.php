@@ -664,3 +664,144 @@ require get_parent_theme_file_path( '/inc/customizer.php' );
  * SVG icons functions and filters.
  */
 require get_parent_theme_file_path( '/inc/icon-functions.php' );
+require get_template_directory() . '/inc/theme-option.php';
+function register_my_menu() {
+    register_nav_menu('header-menu',__( 'Menu chính' ));
+    register_nav_menu('left-menu',__( 'Menu trái' ));
+    register_nav_menu('timhieu-menu',__( 'Menu chuyên mục' ));
+}
+add_action( 'init', 'register_my_menu' );
+
+function wp_get_menu_array($current_menu) {
+
+    $array_menu = wp_get_nav_menu_items($current_menu);
+    // var_dump($array_menu);
+    $menu = array();
+    foreach ($array_menu as $m) {
+        if (empty($m->menu_item_parent)) {
+            $menu[$m->ID] = array();
+            $menu[$m->ID]['ID'] = $m->ID;
+            $menu[$m->ID]['title'] = $m->title;
+            $menu[$m->ID]['url'] = $m->url;
+            $menu[$m->ID]['object_id'] = $m->object_id;
+            $menu[$m->ID]['children'] = array();
+        }
+    }
+    $submenu = array();
+    foreach ($array_menu as $m) {
+        if ($m->menu_item_parent) {
+            $submenu[$m->ID] = array();
+            $submenu[$m->ID]['ID'] = $m->ID;
+            $submenu[$m->ID]['title'] = $m->title;
+            $submenu[$m->ID]['url'] = $m->url;
+            $menu[$m->menu_item_parent]['children'][$m->ID] = $submenu[$m->ID];
+        }
+    }
+    return $menu;
+}
+
+//hiển thị columns taxonomy
+add_filter("manage_edit-category_columns", 'theme_columns'); 
+  
+function theme_columns($theme_columns) {
+    $new_columns = array(
+        'cb' => '<input type="checkbox" />',
+        'name' => __('Name'),
+        'Logo' => 'logo',
+        'description' => __('Description'),
+        'slug' => __('Slug'),
+        'posts' => __('Posts')
+        );
+    return $new_columns;
+}
+//nội dung cột taxonomy
+add_filter("manage_category_custom_column", 'manage_theme_columns', 10, 3);
+  
+function manage_theme_columns($out, $column_name, $term_id) {
+    //$term = get_term($term_id, 'category');
+     
+    switch ($column_name) {
+        case 'logo': 
+            // get header image url
+            //$data = maybe_unserialize($theme->image);
+            $img=get_field("logo","$term_id");
+            // if(is_array($img)) $img=$img;
+            // if(!$img) $img=get_bloginfo('stylesheet_directory').'/images/placeholder.jpg';
+            $out .= "<img src=\"$img\" width=\"100\" height=\"83\"/>"; 
+             
+            break;
+  
+        default:
+            break;
+    }
+    return $out;    
+}
+
+function wpbeginner_numeric_posts_nav() {
+ 
+    if( is_singular() )
+        return;
+ 
+    global $wp_query;
+ 
+    /** Stop execution if there's only 1 page */
+    if( $wp_query->max_num_pages <= 1 )
+        return;
+ 
+    $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
+    $max   = intval( $wp_query->max_num_pages );
+ 
+    /** Add current page to the array */
+    if ( $paged >= 1 )
+        $links[] = $paged;
+ 
+    /** Add the pages around the current page to the array */
+    if ( $paged >= 3 ) {
+        $links[] = $paged - 1;
+        $links[] = $paged - 2;
+    }
+ 
+    if ( ( $paged + 2 ) <= $max ) {
+        $links[] = $paged + 2;
+        $links[] = $paged + 1;
+    }
+ 
+    echo '<div class="navigation"><ul class="pagination justify-content-end">' . "\n";
+ 
+    /** Previous Post Link */
+    if ( get_previous_posts_link() )
+        printf( '<li>%s</li>' . "\n", get_previous_posts_link('Trước') );
+ 
+    /** Link to first page, plus ellipses if necessary */
+    if ( ! in_array( 1, $links ) ) {
+        $class = 1 == $paged ? ' class="active"' : '';
+ 
+        printf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, esc_url( get_pagenum_link( 1 ) ), '1' );
+ 
+        if ( ! in_array( 2, $links ) )
+            echo '<li>…</li>';
+    }
+ 
+    /** Link to current page, plus 2 pages in either direction if necessary */
+    sort( $links );
+    foreach ( (array) $links as $link ) {
+        $class = $paged == $link ? ' class="active"' : '';
+        printf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, esc_url( get_pagenum_link( $link ) ), $link );
+    }
+ 
+    /** Link to last page, plus ellipses if necessary */
+    if ( ! in_array( $max, $links ) ) {
+        if ( ! in_array( $max - 1, $links ) )
+            echo '<li>…</li>' . "\n";
+ 
+        $class = $paged == $max ? ' class="active"' : '';
+        printf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, esc_url( get_pagenum_link( $max ) ), $max );
+    }
+ 
+    /** Next Post Link */
+    if ( get_next_posts_link() )
+        printf( '<li>%s</li>' . "\n", get_next_posts_link('Sau') );
+ 
+    echo '</ul></div>' . "\n";
+ 
+}

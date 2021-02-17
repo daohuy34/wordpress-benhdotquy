@@ -12,7 +12,14 @@
  * @version 1.0
  */
 
-?><!DOCTYPE html>
+?>
+<?php 
+    $itemsMenu = wp_get_menu_array('chuyen-muc'); 
+    $currenCate = array_values($itemsMenu)[0];
+    setcookie("curren_cate_title", $currenCate['title']);
+    setcookie("curren_cate_id", $currenCate['object_id']);
+?>
+<!DOCTYPE html>
 <html <?php language_attributes(); ?> class="no-js no-svg">
 <head>
 <?php wp_head(); ?>
@@ -48,6 +55,7 @@
     <link href="<?php echo get_template_directory_uri(); ?>/assets/css/benhdotquy.css" rel="stylesheet" type="text/css">
     <link href="<?php echo get_template_directory_uri(); ?>/assets/css/owl.carousel.css" rel="stylesheet"/>
     <link href="<?php echo get_template_directory_uri(); ?>/assets/css/jquery.mmenu.all.css" rel="stylesheet"/>
+    <link href="<?php echo get_template_directory_uri(); ?>/assets/css/pagination.css" rel="stylesheet"/>
     
     <!-- Documentation extras -->
     <link href="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css" rel="stylesheet">
@@ -111,16 +119,24 @@
                 	<a href="#menu"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon1-menu.png"></a> 
                 </div>
                 <div class="logo-header"><h1><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-benhdotquy.net.png"/></a></h1></div>
+                <?php
+                $itemsMenuHeader = wp_get_menu_array('menu-header');                         
+                //print_r($items); exit;                       
+                ?>
                 <ul class="menu-hdr  d-flex flex-nowrap">
-                	<li class="nav-item col-md-auto active"><a href="#">Trang chủ</a></li>
-                    <li class="nav-item col-md-auto"><a href="#">Tin tức</a></li>
+                    <?php foreach($itemsMenuHeader as $key => $item): ?>
+                        <li class="nav-item col-md-auto"><a href="<?php echo $item['url']; ?>"><?php echo $item['title']; ?></a></li>
+                    <?php endforeach; ?>
+                    <!-- <li class="nav-item col-md-auto"><a href="#">Tin tức</a></li>
                     <li class="nav-item col-md-auto"><a href="#">CLB Đột quỵ</a></li>
                     <li class="nav-item col-md-auto"><a href="#">Video</a></li>
                     <li class="nav-item col-md-auto"><a href="#">Podcast</a></li>
-                    <li class="nav-item col-md-auto"><a href="#">Tư vấn</a></li>
+                    <li class="nav-item col-md-auto"><a href="#">Tư vấn</a></li> -->
                 </ul>
                 <div class="search-hdr ml-auto"><input type="text" autocomplete="off" name="s" ><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon3-search.png"/></div>
             </div>
         </div>	
     </nav>
 </header>
+
+<main class="bd-masthead" id="content" role="main">

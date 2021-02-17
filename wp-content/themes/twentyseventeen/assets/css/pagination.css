@@ -1,0 +1,39 @@
+.navigation li a {
+    position: relative;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    margin-left: -1px;
+    line-height: 1.25;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+}
+.navigation li a:hover,
+.navigation li.active a,
+.navigation li.disabled {
+    /* color: #fff;
+    text-decoration: none; */
+    z-index: 3;
+    color: #fff !important;
+    background-color: #1b4e81;
+    border-color: #1b4e81;
+}
+
+.navigation li {
+    display: inline;
+}
+
+/* .navigation li a, */
+/* .navigation li a:hover,
+.navigation li.active a,
+.navigation li.disabled {
+    background-color: #6fb7e9;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 12px;
+    padding: 0.75rem;
+}
+
+.navigation li a:hover,
+.navigation li.active a {
+    background-color: #3c8dc5;
+} */
