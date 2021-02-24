@@ -665,6 +665,7 @@ require get_parent_theme_file_path( '/inc/customizer.php' );
  */
 require get_parent_theme_file_path( '/inc/icon-functions.php' );
 require get_template_directory() . '/inc/theme-option.php';
+
 function register_my_menu() {
     register_nav_menu('header-menu',__( 'Menu chính' ));
     register_nav_menu('left-menu',__( 'Menu trái' ));
@@ -804,4 +805,319 @@ function wpbeginner_numeric_posts_nav() {
  
     echo '</ul></div>' . "\n";
  
+}
+
+function gt_get_post_view() {
+    $count = get_post_meta( get_the_ID(), 'post_views_count', true );
+    return "$count views";
+}
+function gt_set_post_view() {
+    $key = 'post_views_count';
+    $post_id = get_the_ID();
+    $count = (int) get_post_meta( $post_id, $key, true );
+    $count++;
+    update_post_meta( $post_id, $key, $count );
+}
+function gt_posts_column_views( $columns ) {
+    $columns['post_views'] = 'Views';
+    return $columns;
+}
+function gt_posts_custom_column_views( $column ) {
+    if ( $column === 'post_views') {
+        echo gt_get_post_view();
+    }
+}
+add_filter( 'manage_posts_columns', 'gt_posts_column_views' );
+add_action( 'manage_posts_custom_column', 'gt_posts_custom_column_views' );
+
+add_action('init','create_account');
+function create_account(){
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reg'])) {
+        if(isset($_POST['uname'])){
+            $user_name = $_POST['uname'];
+            $username = createSlug($_POST['uname']);
+        }
+        if(isset($_POST['uemail'])){
+            $email = $_POST['uemail'];
+        }
+        if(isset($_POST['uphone'])){
+            $phone = $_POST['uphone'];
+        }
+        if(isset($_POST['uaddress'])){
+            $address = $_POST['uaddress'];
+        }
+        $password = 'benhdotquy';
+        $user_id = username_exists( $username );
+        if ( !$user_id && email_exists($email) === false ) {
+            $user_id = wp_create_user( $username, $password, $email );
+            if( !is_wp_error($user_id) ) {
+                $user = get_user_by( 'id', $user_id );
+                $user->set_role('subscriber');
+                // Will return false if the previous value is the same as $new_value.
+                $updatedPhone = update_user_meta( $user_id, 'phone', $phone );
+                if ( $phone != get_user_meta( $user_id,  'phone', true ) ) {
+                    wp_die( __( 'An error occurred', 'textdomain phone' ) );
+                }
+                $updatedAddress = update_user_meta( $user_id, 'address', $address );
+                if ( $address != get_user_meta( $user_id,  'address', true ) ) {
+                    wp_die( __( 'An error occurred', 'textdomain address' ) );
+                }
+                $updatedName = update_user_meta( $user_id, 'fullname', $user_name );
+                if ( $user_name != get_user_meta( $user_id,  'fullname', true ) ) {
+                    wp_die( __( 'An error occurred', 'textdomain fullname' ) );
+                }
+                echo "<script type='text/javascript'>alert('Bạn đã đăng ký thành công.');</script>";
+                return;
+            }
+            echo "<script type='text/javascript'>alert('Có lỗi');</script>"; 
+            return;
+        }else{
+            echo "<script type='text/javascript'>alert('Có lỗi, vui lòng thử lại sau.');</script>"; 
+        }
+        return;
+    }
+    return;
+}
+
+function createSlug($str, $delimiter = ''){
+    $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
+    return $slug;
+} 
+
+function new_contact_methods( $contactmethods ) {
+    $contactmethods['phone'] = 'Phone Number';
+    return $contactmethods;
+}
+add_filter( 'user_contactmethods', 'new_contact_methods', 10, 1 );
+
+function new_modify_user_table( $column ) {
+    $column['phone'] = 'Số điện thoại';
+    $column['address'] = 'Địa chỉ';
+    $column['fullname'] = 'Tên đầy đủ';
+    return $column;
+}
+add_filter( 'manage_users_columns', 'new_modify_user_table' );
+
+function new_modify_user_table_row( $val, $column_name, $user_id ) {
+    switch ($column_name) {
+        case 'phone' :
+            return get_the_author_meta( 'phone', $user_id );
+        case 'address' :
+            return get_the_author_meta( 'address', $user_id );
+        case 'fullname' :
+            return get_the_author_meta( 'fullname', $user_id );
+        default:
+    }
+    return $val;
+}
+add_filter( 'manage_users_custom_column', 'new_modify_user_table_row', 10, 3 );
+
+add_action('init','publish_post');
+function publish_post() {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['question'])) {
+        $name = $_POST['qname'];
+        $phone = $_POST['qphone'];
+        $email = $_POST['qemail'];
+        $address = $_POST['qaddress'];
+        global $user_ID;
+        $new_post = array(
+            'post_title' => $_POST['qquestion'],
+            'post_content' => '',
+            'post_status' => 'draft',
+            'post_date' => date('Y-m-d H:i:s'),
+            'post_author' => $user_ID,
+            'post_type' => 'post',
+            'post_category' => array(31),
+            'meta_my_thong_tin_khach_hang'=> 'Tom', // ACF text field
+        );
+        $post_id = wp_insert_post($new_post);
+        update_field('thong_tin_khach_hang', ''.$name.'-'.$phone.'-'.$email.'-'.$address.'', $post_id);
+        return;
+    }
+    // return;
+}
+
+function creatDatabaseInfoStore(){
+        global $wpdb;
+        $charsetCollate = $wpdb->get_charset_collate();
+        $contactTable = $wpdb->prefix . 'stores';
+        $createContactTable = "CREATE TABLE IF NOT EXISTS `{$contactTable}` (
+            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `name` varchar(255) NOT NULL,
+            `phone` varchar(20) NULL,
+            `address` varchar(255) NULL,
+            `lat` varchar(255) NULL,
+            `lng` varchar(255) NULL,
+            PRIMARY KEY (`id`)
+        ) {$charsetCollate};";
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $createContactTable );
+}	
+add_action( 'after_switch_theme', 'creatDatabaseInfoStore' );
+
+add_action( 'admin_menu', 'extra_post_info_menu' );  
+function extra_post_info_menu(){ ?>
+    <!-- import css, js -->
+    <link href="<?php echo get_template_directory_uri(); ?>/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css" rel="stylesheet">
+    <link href="<?php echo get_template_directory_uri(); ?>/assets/css/owl.carousel.css" rel="stylesheet"/>
+    <link href="<?php echo get_template_directory_uri(); ?>/assets/css/jquery.mmenu.all.css" rel="stylesheet"/>
+    <link href="<?php echo get_template_directory_uri(); ?>/assets/css/pagination.css" rel="stylesheet"/>
+    <script src="<?php echo get_template_directory_uri(); ?>/assets/js/jquery-2.1.3.js"></script>
+    <script src="<?php echo get_template_directory_uri(); ?>/assets/js/bootstrap.js"></script>
+    <script src="<?php echo get_template_directory_uri(); ?>/assets/js/owl.carousel.js"></script>
+    <script src="<?php echo get_template_directory_uri(); ?>/assets/js/style.js"></script>
+    <script src="<?php echo get_template_directory_uri(); ?>/assets/js/jquery.mmenu.min.all.js"></script>
+    <script src="<?php echo get_template_directory_uri(); ?>/assets/js/jquery.matchHeight.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3&amp;sensor=false"></script>
+    <!--  -->
+
+    <?php
+    $page_title = 'Danh sách cửa hàng';   
+    $menu_title = 'Địa chỉ';   
+    $capability = 'manage_options';   
+    $menu_slug  = 'cua-hang';   
+    $function   = 'store_list_dashboard';   
+    $icon_url   = '';   
+    $position   = 8;    
+    add_menu_page( 
+        $page_title,                  
+        $menu_title,                   
+        $capability,                   
+        $menu_slug,                   
+        $function,                   
+        $icon_url,                   
+        $position 
+    );
+    add_submenu_page('cua-hang','Thêm mới','Thêm mới',$capability,'vcn-ctv-configuration','vcn_ctv_configuration');
+}
+
+function store_list_dashboard(){ ?>
+    <?php 
+        global $wpdb;
+        $table = $wpdb->prefix . 'stores';
+        $sql = "SELECT * FROM {$table}";
+        $stores = $wpdb->get_results( $sql, ARRAY_A);
+    ?>
+    <div class="wrap">
+        <p><h2>Danh sách địa chỉ</h2></p>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                <th scope="col">#</th>
+                <th scope="col">Tên bác sĩ</th>
+                <th scope="col">Địa chỉ</th>
+                <th scope="col">Số điện thoại</th>
+                <th scope="col">lat</th>
+                <th scope="col">lng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($stores as $key => $store):?>
+                <tr>
+                    <th scope="row"><?php echo $key+1 ?></th>
+                    <td><?php echo $store['name']; ?></td>
+                    <td><?php echo $store['address']; ?></td>
+                    <td><?php echo $store['phone']; ?></td>
+                    <td><?php echo $store['lat']; ?></td>
+                    <td><?php echo $store['lng']; ?></td>
+                </tr>
+                <?php endforeach;?>
+            </tbody>
+        </table>
+    </div> 
+<?php }
+
+function vcn_ctv_configuration(){
+    if(isset($_POST['submit'])){
+        global $wpdb;
+        $namedt=$_POST['namedt'];
+        $phonedt=$_POST['phonedt'];
+        $addressdt=$_POST['addressdt'];
+        $lat=$_POST['lat'];
+        $lng=$_POST['lng'];
+        $table_name = $wpdb->prefix . "stores";
+        $result = $wpdb->insert($table_name, array('name' => $namedt, 'phone' => $phonedt, 'address' => $addressdt,'lat' => $lat, 'lng'=>$lng) ); 
+        var_dump($result);
+        if($result){
+            echo "<script type='text/javascript'>alert('Thêm thành công.');</script>";
+        }
+    }
+    ?>
+    <div class="warp">
+        <form action="" method="post">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Tên bác sĩ</label>
+                <input type="text" class="form-control" name="namedt">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Số điện thoại</label>
+                <input type="text" class="form-control" name="phonedt">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Địa chỉ</label>
+                <input type="text" class="form-control" name="addressdt">
+            </div>
+            <div class="form-group">
+                <iframe d="googleMap" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d48058.125230191756!2d105.82507597701552!3d21.02126962242886!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1svi!2s!4v1613661151919!5m2!1svi!2s" width="100%" height="500" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+                <input type='hidden' name='lat' id='lat'>  
+                <input type='hidden' name='lng' id='lng'> 
+            </div>
+            <input type="submit" class="btn btn-primary" name="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+    function initialize() {
+        var myLatlng = new google.maps.LatLng(21.028109290576655,105.8381648925781);
+        var mapProp = {
+            center:myLatlng,
+            zoom:5,
+            mapTypeId:google.maps.MapTypeId.ROADMAP
+            
+        };
+        var map=new google.maps.Map(document.getElementById("googleMap"), mapProp);
+            var marker = new google.maps.Marker({
+            position: myLatlng,
+            map: map,
+            title: 'Hello World!',
+            draggable:true  
+        });
+            document.getElementById('lat').value= 21.028109290576655
+            document.getElementById('lng').value= 105.8381648925781  
+            // marker drag event
+            google.maps.event.addListener(marker,'drag',function(event) {
+                document.getElementById('lat').value = event.latLng.lat();
+                document.getElementById('lng').value = event.latLng.lng();
+            });
+
+            //marker drag event end
+            google.maps.event.addListener(marker,'dragend',function(event) {
+                document.getElementById('lat').value = event.latLng.lat();
+                document.getElementById('lng').value = event.latLng.lng();
+                // alert("lat=>"+event.latLng.lat());
+                // alert("long=>"+event.latLng.lng());
+            });
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+<?php }
+
+function my_acf_google_map_api ( $api ){
+    $api['key'] = 'AIzaSyBoSIwj8uHCxvHcpbhi8rcQllZN0Wp-7ds'; // Thay key api của bạn vào đây nhé
+    return $api;
+}
+add_filter('acf/fields/google_map/api', 'my_acf_google_map_api');
+function my_acf_init() {
+    acf_update_setting('google_api_key', 'AIzaSyBoSIwj8uHCxvHcpbhi8rcQllZN0Wp-7ds');
+}
+add_action('acf/init', 'my_acf_init');
+
+function getpost_maps_home() {
+	global $wpdb;
+    $table = $wpdb->prefix . 'stores';
+    $sql = "SELECT * FROM {$table}";
+    $stores = $wpdb->get_results( $sql, ARRAY_A);
+    // var_dump($stores);
+    return $stores;
 }

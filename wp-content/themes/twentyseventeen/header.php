@@ -95,6 +95,8 @@
     <script src="<?php echo get_template_directory_uri(); ?>/assets/js/style.js"></script>
     <script src="<?php echo get_template_directory_uri(); ?>/assets/js/jquery.mmenu.min.all.js"></script>
     <script src="<?php echo get_template_directory_uri(); ?>/assets/js/jquery.matchHeight.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3&amp;sensor=false"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -120,20 +122,18 @@
                 </div>
                 <div class="logo-header"><h1><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-benhdotquy.net.png"/></a></h1></div>
                 <?php
-                $itemsMenuHeader = wp_get_menu_array('menu-header');                         
-                //print_r($items); exit;                       
+                    $itemsMenuHeader = wp_get_menu_array('menu-header');
                 ?>
                 <ul class="menu-hdr  d-flex flex-nowrap">
                     <?php foreach($itemsMenuHeader as $key => $item): ?>
                         <li class="nav-item col-md-auto"><a href="<?php echo $item['url']; ?>"><?php echo $item['title']; ?></a></li>
                     <?php endforeach; ?>
-                    <!-- <li class="nav-item col-md-auto"><a href="#">Tin tức</a></li>
-                    <li class="nav-item col-md-auto"><a href="#">CLB Đột quỵ</a></li>
-                    <li class="nav-item col-md-auto"><a href="#">Video</a></li>
-                    <li class="nav-item col-md-auto"><a href="#">Podcast</a></li>
-                    <li class="nav-item col-md-auto"><a href="#">Tư vấn</a></li> -->
                 </ul>
-                <div class="search-hdr ml-auto"><input type="text" autocomplete="off" name="s" ><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon3-search.png"/></div>
+                <div class="search-hdr ml-auto">
+                    <?php get_search_form(); ?>
+                    <!-- <input type="text" autocomplete="off" name="s" >
+                    <img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon3-search.png"/> -->
+                </div>
             </div>
         </div>	
     </nav>

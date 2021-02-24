@@ -13,6 +13,16 @@
  */
 
 ?>
+<?php
+// if ($_SERVER["REQUEST_METHOD"] == "POST") {
+//     var_dump($_POST["name"]);
+// }
+?>
+<?php 
+$url = __DIR__ . '/tinh-thanh.json';
+    $string = file_get_contents($url);
+    $arr = json_decode($string, true)
+?>
 <div class="footer-dotquy">
     	<div class="container  d-flex flex-nowrap">
         	<ul class="list-group list-group-horizontal">
@@ -39,57 +49,58 @@
           </div>
           <div class="modal-body">
             <form>
-              	<select class="form-control form-select form-select-sm mb-3" aria-label=".form-select-sm example">
+              	<select id="mySelect" class="form-control form-select form-select-sm mb-3" aria-label=".form-select-sm example">
                   <option selected>Chọn tên tỉnh thành</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
+                    <?php foreach($arr as $key => $a): ?>
+                    <option name="<?php echo $a['name'] ?>" value="<?php echo $a['code']  ?>"><?php echo $a['name'] ?></option>
+                    <?php endforeach; ?>
                 </select>
                 <input type="text" class="form-control" id="recipient-name" placeholder="Nhập từ khóa cần tìm...">
             </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-outline-primary">Tìm kiếm</button>
+            <a href="<?php echo get_permalink( 233 )?>" type="button" class="btn btn-outline-primary">Tìm kiếm</a>
           </div>
         </div>
       </div>
     </div><!--searhAdd-->
     <div class="modal fade searchadd-modal" id="thanhvienModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="thanhvienModal">Đăng ký thành viên</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-            	<div class="form-group">
-                	<label for="inputEmail4" class="form-label">Họ và tên:</label>
-    				<input type="text" class="form-control" id="inputEmail4">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="thanhvienModal">Đăng ký thành viên</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="form-group">
-                	<label for="inputEmail4" class="form-label">Số điện thoại:</label>
-    				<input type="text" class="form-control" id="inputEmail4">
+                <div class="modal-body">
+                    <form name="myForm" method="post">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Họ và tên:</label>
+                            <input type="text" class="form-control" name="uname" id="uname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Số điện thoại:</label>
+                            <input type="number" class="form-control" name="uphone"  id="uphone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="text" class="form-control" name="uemail" id="uemail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address" class="form-label">Địa chỉ của bạn:</label>
+                            <input type="text" class="form-control" name="uaddress" id="uaddress" required>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="reg">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
+                            <button id="regsubmit" type="submit" class="btn btn-outline-primary">Đăng ký</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                	<label for="inputEmail4" class="form-label">Email</label>
-    				<input type="text" class="form-control" id="inputEmail4">
-                </div>
-                <div class="form-group">
-                	<label for="inputEmail4" class="form-label">Địa chỉ của bạn:</label>
-    				<input type="text" class="form-control" id="inputEmail4">
-                </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-outline-primary">Đăng ký</button>
-          </div>
+            </div>
         </div>
-      </div>
     </div><!--dangkythanhvien-->
     <div class="modal fade searchadd-modal" id="cauhoiModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -101,17 +112,18 @@
             </button>
           </div>
           <div class="modal-body">
-            <form>
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Họ và tên">
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Số điện thoại">
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Email">
-                <input type="text" class="form-control mb-3" id="inputEmail4" placeholder="Địa chỉ">
-                <textarea class="form-control" aria-label="With textarea" placeholder="Nhập nội dung cần hỏi"></textarea>
+            <form name="myFormQuestion" method="post">
+                <input type="text" class="form-control mb-3" name="qname" id="inputEmail4" placeholder="Họ và tên">
+                <input type="text" class="form-control mb-3" name="qphone"  id="inputEmail4" placeholder="Số điện thoại">
+                <input type="text" class="form-control mb-3" name="qemail"  id="inputEmail4" placeholder="Email">
+                <input type="text" class="form-control mb-3" name="qaddress"  id="inputEmail4" placeholder="Địa chỉ">
+                <textarea class="form-control" aria-label="With textarea" name="qquestion"  placeholder="Nhập nội dung cần hỏi"></textarea>
+                <div class="modal-footer">
+                    <input type="hidden" name="question">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-outline-primary">Đặt câu hỏi</button>
+                </div>
             </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-outline-primary">Đặt câu hỏi</button>
           </div>
         </div>
       </div>
@@ -132,7 +144,6 @@
 </main>
 
 <?php wp_footer(); ?>
-
 </body>
 <script>
 function myFunction(item, id) {
@@ -140,6 +151,41 @@ function myFunction(item, id) {
     document.cookie = `curren_cate_title=${item}`;
     document.cookie = `curren_cate_id=${id}`;
     $("#timhieu").load(location.href + " #timhieu");
+}
+$('#mySelect').change(function(){ 
+    var value = $(this).val();
+    var name = $( "option:selected" ).attr( "name" );
+    document.cookie = `code=${value}`;
+    document.cookie = `name=${name}`;
+    // insertParam('code', value)
+    // insertParam('name', name)
+});
+function insertParam(key, value) {
+    key = encodeURIComponent(key);
+    value = encodeURIComponent(value);
+
+    // kvp looks like ['key1=value1', 'key2=value2', ...]
+    var kvp = document.location.search.substr(1).split('&');
+    let i=0;
+
+    for(; i<kvp.length; i++){
+        if (kvp[i].startsWith(key + '=')) {
+            let pair = kvp[i].split('=');
+            pair[1] = value;
+            kvp[i] = pair.join('=');
+            break;
+        }
+    }
+
+    if(i >= kvp.length){
+        kvp[kvp.length] = [key,value].join('=');
+    }
+
+    // can return this or...
+    let params = kvp.join('&');
+    return
+    // reload page with new params
+    document.location.search = params;
 }
 </script>
 </html>
