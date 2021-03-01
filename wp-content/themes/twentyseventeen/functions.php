@@ -829,10 +829,16 @@ function gt_posts_custom_column_views( $column ) {
 }
 add_filter( 'manage_posts_columns', 'gt_posts_column_views' );
 add_action( 'manage_posts_custom_column', 'gt_posts_custom_column_views' );
-
+add_action( 'wp_mail_failed', 'onMailError', 10, 1 );
+function onMailError( $wp_error ) {
+    echo "<pre>";
+    print_r($wp_error);
+    echo "</pre>";
+} 
 add_action('init','create_account');
 function create_account(){
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reg'])) {
+        // send_smtp_email();
         if(isset($_POST['uname'])){
             $user_name = $_POST['uname'];
             $username = createSlug($_POST['uname']);
@@ -846,9 +852,10 @@ function create_account(){
         if(isset($_POST['uaddress'])){
             $address = $_POST['uaddress'];
         }
+        // $body = '
         $password = 'benhdotquy';
         $user_id = username_exists( $username );
-        if ( !$user_id && email_exists($email) === false ) {
+        if ( !$user_id) {
             $user_id = wp_create_user( $username, $password, $email );
             if( !is_wp_error($user_id) ) {
                 $user = get_user_by( 'id', $user_id );
@@ -866,15 +873,36 @@ function create_account(){
                 if ( $user_name != get_user_meta( $user_id,  'fullname', true ) ) {
                     wp_die( __( 'An error occurred', 'textdomain fullname' ) );
                 }
+                // $to = $email;
+                $subject = "Đăng kí thành viên CLB bệnh đột quỵ";
+                // $body = 'Họ tên: '.$user_name.'
+                // SDT: '.$phone.'
+                // Địa chỉ: '.$address;
+                // Chèn chuỗi ngăn cách
+                $random_hash = md5(date('r', time()));
+
+                // Nội dung mail cần gửi nằm tại đây
+                ob_start(); //Bật output buffering ?>
+                
+                [THÔNG BÁO] Khách hàng đăng kí vào CLB Người đột quỵ!!!
+                Thônh tin khách hàng:
+                Họ và tên: <?php echo $user_name; ?>.
+                Số điện thoại: <?php echo $phone; ?>.
+                Mail: <?php echo $email; ?>.
+                Địa chỉ: <?php echo $address; ?>.
+                <small>* Đây là thư tự động, vui lòng ko trả lời.</small>
+                <?php $body = ob_get_contents(); ?>
+                <?php
+                ob_get_clean();
+                wp_mail('daohuy34@gmail.com', $subject, $body);
                 echo "<script type='text/javascript'>alert('Bạn đã đăng ký thành công.');</script>";
                 return;
             }
-            echo "<script type='text/javascript'>alert('Có lỗi');</script>"; 
+            echo "<script type='text/javascript'>alert('Có lỗi');</script>";
             return;
         }else{
             echo "<script type='text/javascript'>alert('Có lỗi, vui lòng thử lại sau.');</script>"; 
         }
-        return;
     }
     return;
 }
@@ -948,6 +976,8 @@ function creatDatabaseInfoStore(){
             `address` varchar(255) NULL,
             `lat` varchar(255) NULL,
             `lng` varchar(255) NULL,
+            -- `code_province` int(20) NULL,
+            `name_province` varchar(255) NULL
             PRIMARY KEY (`id`)
         ) {$charsetCollate};";
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -973,7 +1003,7 @@ function extra_post_info_menu(){ ?>
     <!--  -->
 
     <?php
-    $page_title = 'Danh sách cửa hàng';   
+    $page_title = 'Danh sách địa chỉ';   
     $menu_title = 'Địa chỉ';   
     $capability = 'manage_options';   
     $menu_slug  = 'cua-hang';   
@@ -999,6 +1029,19 @@ function store_list_dashboard(){ ?>
         $sql = "SELECT * FROM {$table}";
         $stores = $wpdb->get_results( $sql, ARRAY_A);
     ?>
+    <?php 
+    if (isset($_GET['del'])) {
+        $del_id = $_GET['del'];
+        $delete = $wpdb->delete(
+            $table,
+            array( 'id' => $del_id ),
+            array( '%d' )
+        );
+        $stores = $wpdb->get_results( $sql, ARRAY_A);
+        // echo "<script type='text/javascript'>alert('Xóa thành công.');</script>";
+        echo "<script>location.replace('admin.php?page=cua-hang);</script>";
+    }
+    ?>
     <div class="wrap">
         <p><h2>Danh sách địa chỉ</h2></p>
         <table class="table table-striped table-hover">
@@ -1008,8 +1051,9 @@ function store_list_dashboard(){ ?>
                 <th scope="col">Tên bác sĩ</th>
                 <th scope="col">Địa chỉ</th>
                 <th scope="col">Số điện thoại</th>
-                <th scope="col">lat</th>
-                <th scope="col">lng</th>
+                <th scope="col">Hành động</th>
+                <!-- <th scope="col">lat</th>
+                <th scope="col">lng</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -1017,10 +1061,9 @@ function store_list_dashboard(){ ?>
                 <tr>
                     <th scope="row"><?php echo $key+1 ?></th>
                     <td><?php echo $store['name']; ?></td>
-                    <td><?php echo $store['address']; ?></td>
+                    <td><?php echo $store['address']; ?>, <?php echo $store['name_province']; ?></td>
                     <td><?php echo $store['phone']; ?></td>
-                    <td><?php echo $store['lat']; ?></td>
-                    <td><?php echo $store['lng']; ?></td>
+                    <td><a href='<?php echo admin_url(); ?>admin.php?page=cua-hang&del=<?php echo $store['id']?>'><button type='button'>DELETE</button></a></td>
                 </tr>
                 <?php endforeach;?>
             </tbody>
@@ -1034,15 +1077,28 @@ function vcn_ctv_configuration(){
         $namedt=$_POST['namedt'];
         $phonedt=$_POST['phonedt'];
         $addressdt=$_POST['addressdt'];
-        $lat=$_POST['lat'];
-        $lng=$_POST['lng'];
+        $select = explode(",",$_POST['province'])[0] ;
+        $selectCode = explode(",",$_POST['province'])[1] ;
         $table_name = $wpdb->prefix . "stores";
-        $result = $wpdb->insert($table_name, array('name' => $namedt, 'phone' => $phonedt, 'address' => $addressdt,'lat' => $lat, 'lng'=>$lng) ); 
-        var_dump($result);
+        $result = $wpdb->insert(
+            $table_name, 
+            array(
+                'name' => $namedt, 
+                'phone' => $phonedt, 
+                'address' => $addressdt, 
+                'name_province' => $select, 
+                'code_province' => $selectCode
+            )
+        ); 
         if($result){
             echo "<script type='text/javascript'>alert('Thêm thành công.');</script>";
         }
     }
+    ?>
+    <?php 
+        $url = __DIR__ . '/tinh-thanh.json';
+        $string = file_get_contents($url);
+        $arr = json_decode($string, true)
     ?>
     <div class="warp">
         <form action="" method="post">
@@ -1055,11 +1111,19 @@ function vcn_ctv_configuration(){
                 <input type="text" class="form-control" name="phonedt">
             </div>
             <div class="form-group">
+                <label for="province">Chọn thành phố:</label>
+                <select name="province" id="province">
+                    <?php foreach($arr as $key => $a): ?>
+                        <option name="<?php echo $a['name'] ?>" value="<?php echo $a['name']  ?>, <?php echo $a['code']  ?>"><?php echo $a['name'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="exampleInputPassword1">Địa chỉ</label>
                 <input type="text" class="form-control" name="addressdt">
             </div>
             <div class="form-group">
-                <iframe d="googleMap" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d48058.125230191756!2d105.82507597701552!3d21.02126962242886!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1svi!2s!4v1613661151919!5m2!1svi!2s" width="100%" height="500" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+            <!-- AIzaSyDQ0Y21E6S0EbM1Fkrxq7id9qPGA_dZpAQ -->
                 <input type='hidden' name='lat' id='lat'>  
                 <input type='hidden' name='lng' id='lng'> 
             </div>
@@ -1103,15 +1167,15 @@ function vcn_ctv_configuration(){
     </script>
 <?php }
 
-function my_acf_google_map_api ( $api ){
-    $api['key'] = 'AIzaSyBoSIwj8uHCxvHcpbhi8rcQllZN0Wp-7ds'; // Thay key api của bạn vào đây nhé
-    return $api;
-}
-add_filter('acf/fields/google_map/api', 'my_acf_google_map_api');
-function my_acf_init() {
-    acf_update_setting('google_api_key', 'AIzaSyBoSIwj8uHCxvHcpbhi8rcQllZN0Wp-7ds');
-}
-add_action('acf/init', 'my_acf_init');
+// function my_acf_google_map_api ( $api ){
+//     $api['key'] = 'AIzaSyBoSIwj8uHCxvHcpbhi8rcQllZN0Wp-7ds'; // Thay key api của bạn vào đây nhé
+//     return $api;
+// }
+// add_filter('acf/fields/google_map/api', 'my_acf_google_map_api');
+// function my_acf_init() {
+//     acf_update_setting('google_api_key', 'AIzaSyBoSIwj8uHCxvHcpbhi8rcQllZN0Wp-7ds');
+// }
+// add_action('acf/init', 'my_acf_init');
 
 function getpost_maps_home() {
 	global $wpdb;
@@ -1121,3 +1185,62 @@ function getpost_maps_home() {
     // var_dump($stores);
     return $stores;
 }
+
+add_action('wp_ajax_load_custom_espositori', 'load_custom_espositori_ajax_handler'); // wp_ajax_{action}
+add_action('wp_ajax_nopriv_load_custom_espositori', 'load_custom_espositori_ajax_handler'); // wp_ajax_nopriv_{action}
+
+function load_custom_espositori_ajax_handler() {      
+    $args = array(
+        'post_type' => 'post',
+        'posts_per_page' => 8,
+        'cat' => $_POST['id']
+    );
+
+    $category_current = get_category($_POST['id']);
+    // var_dump($category_current);
+    $myquery = new WP_Query( $args );
+    $postList = $myquery->posts;
+    if($postList){
+        foreach ($postList as $key => $post) :
+        // var_dump($post);
+        $url = wp_get_attachment_url( get_post_thumbnail_id($post->ID), 'thumbnail' );
+        ?>
+            <div class="col">
+                <div class="img-timhieuhome">
+                    <div class="responsive-image responsive-image--16by9">
+                        <a href="<?php echo get_permalink( $post->ID ) ?>">
+                            <img alt="<?php the_title(); ?>" src="<?php echo $url; ?>">
+                        </a>
+                    </div>
+                </div>
+                <h2 class="name-sub2"><a href="<?php echo get_category_link( $category_current->cat_ID ) ?>"><?php echo $category_current->name ?></a></h2>
+                <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php echo $post->post_title; ?></a></h3>
+            </div>
+        <?php endforeach;
+        wp_reset_query(); 
+    }
+    wp_die();
+}
+
+function cf7Submit($formId , $args) {
+    $url = 'http://example.com/wp-json/contact-form-7/v1/contact-forms/'.$formId.'/feedback';
+    $response = wp_remote_post( $url, array(
+        'method'      => 'POST',
+        'body'        => $args
+        )
+    );
+
+    if ( is_wp_error( $response ) ) {
+        $error_message = $response->get_error_message();
+        echo "Something went wrong: $error_message";
+    } else {
+        echo 'Response:<pre>';
+        print_r( $response );
+        echo '</pre>';
+    }
+}
+
+// add_action('init','payuoc_test_email');
+// function payuoc_test_email() {
+//    wp_mail("daohuy34@gmail.com", "testing email", "sample content");
+// };

@@ -9,7 +9,7 @@
  * @package WordPress
  * @subpackage Twenty_Seventeen
  * @since Twenty Seventeen 1.0
- * @version 1.2
+ * @version 1.2 <?php echo do_shortcode('[contact-form-7 id="249" title="Contact form 1"]')?>
  */
 
 ?>
@@ -17,9 +17,11 @@
 // if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //     var_dump($_POST["name"]);
 // }
+$url_site = site_url( '/dia-chi' );
+// echo $url;
 ?>
 <?php 
-$url = __DIR__ . '/tinh-thanh.json';
+    $url = __DIR__ . '/tinh-thanh.json';
     $string = file_get_contents($url);
     $arr = json_decode($string, true)
 ?>
@@ -49,19 +51,21 @@ $url = __DIR__ . '/tinh-thanh.json';
           </div>
           <div class="modal-body">
             <form>
-              	<select id="mySelect" class="form-control form-select form-select-sm mb-3" aria-label=".form-select-sm example">
+              	<select name="mySelect" id="mySelect" class="form-control form-select form-select-sm mb-3" aria-label=".form-select-sm example">
                   <option selected>Chọn tên tỉnh thành</option>
                     <?php foreach($arr as $key => $a): ?>
                     <option name="<?php echo $a['name'] ?>" value="<?php echo $a['code']  ?>"><?php echo $a['name'] ?></option>
                     <?php endforeach; ?>
                 </select>
                 <input type="text" class="form-control" id="recipient-name" placeholder="Nhập từ khóa cần tìm...">
+                <input type='hidden' name='do' value='search' />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
+                    <a id="find" type="submit" name="find" class="btn btn-outline-primary">Tìm kiếm</a>
+                </div>
             </form>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Đóng</button>
-            <a href="<?php echo get_permalink( 233 )?>" type="button" class="btn btn-outline-primary">Tìm kiếm</a>
-          </div>
+          
         </div>
       </div>
     </div><!--searhAdd-->
@@ -131,13 +135,22 @@ $url = __DIR__ . '/tinh-thanh.json';
     <!-- allmenu-mobile start-->
     <nav id="menu">
     	<ul>
-        	<li><a class="ml-auto"><input class=" form-control" type="text" autocomplete="off" name="s" placeholder="Tìm kiếm"></a></li>
+        	<li>
+                <a class="ml-auto">
+                    <?php $unique_id = esc_attr( twentyseventeen_unique_id( 'search-form-' ) ); ?>
+
+                    <form role="search" method="get" class="search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+                        <!-- <input class=" form-control" type="text" autocomplete="off" name="s" placeholder="Tìm kiếm"> -->
+                        <input type="text" autocomplete="off" id="<?php echo $unique_id; ?>" class="search-field form-control" placeholder="<?php echo esc_attr_x( '', 'placeholder', 'twentyseventeen' ); ?>" value="<?php echo get_search_query(); ?>" name="s" />
+                    </form>
+                </a>
+            </li>
             <?php
                 $itemsMenuLeft = wp_get_menu_array('menu-left');                         
                 //print_r($items); exit;                       
             ?>
             <?php foreach($itemsMenuLeft as $key => $item): ?>
-            <li class="active"><a href="<?php echo $item['url']; ?>"><?php echo $item['title']; ?></a></li>
+                <li id="<?php echo $item['ID']; ?>" class=""><a href="<?php echo $item['url']; ?>"><?php echo $item['title']; ?></a></li>
             <?php endforeach; ?>
          </ul>
     </nav>
@@ -146,46 +159,55 @@ $url = __DIR__ . '/tinh-thanh.json';
 <?php wp_footer(); ?>
 </body>
 <script>
-function myFunction(item, id) {
-    console.log('myFunction', item, id);
-    document.cookie = `curren_cate_title=${item}`;
-    document.cookie = `curren_cate_id=${id}`;
-    $("#timhieu").load(location.href + " #timhieu");
-}
-$('#mySelect').change(function(){ 
-    var value = $(this).val();
-    var name = $( "option:selected" ).attr( "name" );
-    document.cookie = `code=${value}`;
-    document.cookie = `name=${name}`;
-    // insertParam('code', value)
-    // insertParam('name', name)
+$( window ).on( "load", function() {
+    var menu = <?php print_r(json_encode($itemsMenuLeft,true)) ?>;
+    var convertMnToArray = [];
+    for (const property in menu) {
+        convertMnToArray.push(menu[property])
+    }
+    const result = convertMnToArray.find(e=>e.url === window.location.href);
+    if(result){
+        var id = `#${result.ID}`;
+        $(id).addClass('active');
+    }
 });
-function insertParam(key, value) {
-    key = encodeURIComponent(key);
-    value = encodeURIComponent(value);
-
-    // kvp looks like ['key1=value1', 'key2=value2', ...]
-    var kvp = document.location.search.substr(1).split('&');
-    let i=0;
-
-    for(; i<kvp.length; i++){
-        if (kvp[i].startsWith(key + '=')) {
-            let pair = kvp[i].split('=');
-            pair[1] = value;
-            kvp[i] = pair.join('=');
-            break;
+function myFunction(item, id) {
+    var ajaxurl = `<?php echo get_template_directory_uri(); ?>` + '/ajax.php'
+    $.ajax({
+        url : '<?php echo site_url(); ?>/wp-admin/admin-ajax.php', // AJAX handler
+        data : { action : 'load_custom_espositori', id },
+        type : 'POST',
+        success : function( result ){
+            if( result ) {
+                $('#load-data-category').html(result);
+                $('#title-category').text(item);
+            }
         }
-    }
-
-    if(i >= kvp.length){
-        kvp[kvp.length] = [key,value].join('=');
-    }
-
-    // can return this or...
-    let params = kvp.join('&');
-    return
-    // reload page with new params
-    document.location.search = params;
+    });
 }
+$( "#find" ).click(function() {
+    console.log('find');
+    
+    var select = $( "#mySelect" ).val();
+    var recipient = $( "#recipient-name" ).val();
+    var nameCode = $("#mySelect option:selected").attr("name");
+    // console.log(select, recipient, nameCode);
+    // if(recipient){
+    //     console.log('aaa');
+        
+    // }
+    // return
+    window.location.href = `<?php echo $url_site ?>?code=${select}&namecode=${nameCode}${recipient?'&store=${recipient}':''}`;
+});
+// $( "#regsubmit" ).click(function() {
+//     $.ajax({
+//         url : '<?php echo site_url(); ?>/wp-admin/admin-ajax.php', // AJAX handler
+//         data : { action : 'send_smtp_email', id },
+//         type : 'POST',
+//         success : function( result ){
+//             console.log(result);
+//         }
+//     });
+// })
 </script>
 </html>

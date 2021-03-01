@@ -120,7 +120,7 @@
             	<div class="icon-menu dropdown">
                 	<a href="#menu"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon1-menu.png"></a> 
                 </div>
-                <div class="logo-header"><h1><a href="#"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-benhdotquy.net.png"/></a></h1></div>
+                <div class="logo-header"><h1><a href="<?php echo home_url(); ?>"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-benhdotquy.net.png"/></a></h1></div>
                 <?php
                     $itemsMenuHeader = wp_get_menu_array('menu-header');
                 ?>
@@ -131,8 +131,6 @@
                 </ul>
                 <div class="search-hdr ml-auto">
                     <?php get_search_form(); ?>
-                    <!-- <input type="text" autocomplete="off" name="s" >
-                    <img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon3-search.png"/> -->
                 </div>
             </div>
         </div>	

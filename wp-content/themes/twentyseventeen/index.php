@@ -36,7 +36,7 @@
                 	<div class="bg-topadd">
                         <div class="img-add mb-2"><a href="#" class="d-flex flex-nowrap"><img alt="..." src="<?php echo get_template_directory_uri(); ?>/assets/images/icon4-address.png"/><h3>Địa chỉ cấp cứu đột quỵ trong toàn quốc</h3></a></div>
                         <div class="btn-topaddress">
-                            <a class="mb-2" href="#">Xem chi tiết</a>
+                            <a class="mb-2" href="<?php echo get_permalink( 233 )?>">Xem chi tiết</a>
                             <a data-toggle="modal" data-target="#searhAdd" data-whatever="@mdo">Tìm kiếm địa chỉ</a>
                         </div>
                     </div>
@@ -62,7 +62,7 @@
                 <div class="col-6">
                     <div class="img-cover">
                         <div class="responsive-image responsive-image--16by9">
-                            <a href="#"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
+                            <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
                         </div>	
                     </div>
                     <h2 class="name-sub2"><a href="<?php echo get_category_link( $category[0]->term_id) ?>"><?php echo $category[0]->cat_name; ?></a></h2>
@@ -83,7 +83,7 @@
                         <li>
                             <div class="img-cover">
                                 <div class="responsive-image responsive-image--16by9">
-                                    <a href="#"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
+                                    <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
                                 </div>	
                             </div>
                             <h2 class="name-sub2"><a href="<?php echo get_category_link( $category[0]->term_id) ?>"><?php echo $category[0]->cat_name; ?></a></h2>
@@ -191,7 +191,7 @@
                                 	<ul>
                                         <?php
                                             $args = array( 
-                                                'posts_per_page' => 4,
+                                                'posts_per_page' => 2,
                                                 'post_status' => 'publish',
                                                 'post_type' => 'post',
                                                 'cat' => 33
@@ -282,7 +282,7 @@
                         $itemsMenu = wp_get_menu_array('chuyen-muc');
                         $currenCate = array_values($itemsMenu)[0];
                     ?>
-                    <span id="title" class=""><?php echo str_replace('+',' ',$_COOKIE["curren_cate_title"]);?></span>
+                    <span id="title-category" class=""><?php echo $currenCate['title']?></span>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <?php foreach($itemsMenu as $key => $item): ?>
                         <li><a onclick="myFunction('<?php echo $item['title']; ?>', '<?php echo $item['object_id']; ?>')" class="dropdown-item button"><?php echo $item['title']; ?></a></li>
@@ -291,13 +291,13 @@
                     </ul>
                 </h4>
             </div>
-            <div class="row row-cols-1 row-cols-md-4 g-4">
+            <div id="load-data-category" class="row row-cols-1 row-cols-md-4 g-4">
                 <?php
                     $args = array( 
                         'posts_per_page' => 8,
                         'post_status' => 'publish',
                         'post_type' => 'post',
-                        'cat' => $_COOKIE["curren_cate_id"]
+                        'cat' => $currenCate['object_id']
                         );
                     $loop = new WP_Query( $args );
                     $postList = $loop->posts;
@@ -310,7 +310,7 @@
                             <a href="<?php echo get_permalink( $post->ID ) ?>"><img alt="<?php the_title(); ?>" src="<?php echo $url; ?>"></a>
                         </div>
                     </div>
-                    <h2 class="name-sub2"><a href="#"><?php echo $currenCate['title']; ?></a></h2>
+                    <h2 class="name-sub2"><a href="<?php echo get_category_link( $currenCate['object_id'] ) ?>"><?php echo $currenCate['title']; ?></a></h2>
                     <h3><a href="<?php echo get_permalink( $post->ID ) ?>"><?php the_title(); ?></a></h3>
                 </div>
                 <?php endforeach; ?>
